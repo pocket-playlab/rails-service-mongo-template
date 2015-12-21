@@ -2,7 +2,7 @@ This is a simple starting point for creating a new rails backend service with Mo
 
 - A `Dockerfile` for building a container
 - A `docker-compose.yml` file for setting up a development environment
-- Mongoid installed with basic setup
+- **Mongoid** installed with basic setup
 - Stripped-down rails base
   - No ActiveView (no views)
   - No Active Record
