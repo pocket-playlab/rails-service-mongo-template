@@ -1,7 +1,8 @@
-This is a simple starting point for creating a new rails backend service. It has all database-related things removed. Besides, it includes:
+This is a simple starting point for creating a new rails backend service with MongoDB. Besides, it includes:
 
 - A `Dockerfile` for building a container
 - A `docker-compose.yml` file for setting up a development environment
+- Mongoid installed with basic setup
 - Stripped-down rails base
   - No ActiveView (no views)
   - No Active Record
@@ -33,6 +34,7 @@ This is a simple starting point for creating a new rails backend service. It has
 
 #### Environment variables
 
+- `DB_HOST`
 - `NEW_RELIC_APP_NAME`
 - `NEW_RELIC_LICENSE_KEY`
 - `SENTRY_DSN`
