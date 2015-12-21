@@ -1,0 +1,47 @@
+machine:
+  services:
+    - docker
+
+# this step edits timestamps in .git repos to avoid rebuilding everytime
+# http://tschottdorf.github.io/cockroach-docker-circleci-continuous-integration/
+checkout:
+  post:
+    - find . -exec touch -t 201401010000 {} \;
+    - for x in $(git ls-tree --full-tree --name-only -r HEAD); do touch -t $(date -d "$(git log -1 --format=%ci "${x}")" +%y%m%d%H%M.%S) "${x}"; done
+
+dependencies:
+  cache_directories:
+    - "~/docker"
+  override:
+    - mkdir -p ~/docker
+    - if [[ -e ~/docker/$CIRCLE_PROJECT_REPONAME.tar ]]; then docker load -i ~/docker/$CIRCLE_PROJECT_REPONAME.tar; fi
+    - docker build -t pocketplaylab/$CIRCLE_PROJECT_REPONAME:$CIRCLE_BRANCH .
+    - docker save "pocketplaylab/$CIRCLE_PROJECT_REPONAME:$CIRCLE_BRANCH" > ~/docker/$CIRCLE_PROJECT_REPONAME.tar
+
+test:
+  override:
+    - >
+        docker run
+        --entrypoint='bin/run'
+        --net=host
+        -e BUNDLE_WITHOUT=development
+        -e RAILS_ENV=test
+        -e DB_HOST=127.0.0.1
+        pocketplaylab/$CIRCLE_PROJECT_REPONAME:$CIRCLE_BRANCH
+        rspec
+
+deployment:
+  staging:
+    branch: development
+    commands:
+      - sed "s/<EMAIL>/$DOCKER_EMAIL/;s/<AUTH>/$DOCKER_AUTH/" dockercfg.template > ~/.dockercfg
+      - docker push pocketplaylab/$CIRCLE_PROJECT_REPONAME:$CIRCLE_BRANCH
+      - ./bin/deploy-coreos staging :
+          timeout: 600
+  production:
+    branch: master
+    commands:
+      - sed "s/<EMAIL>/$DOCKER_EMAIL/;s/<AUTH>/$DOCKER_AUTH/" dockercfg.template > ~/.dockercfg
+      - docker push pocketplaylab/$CIRCLE_PROJECT_REPONAME:$CIRCLE_BRANCH
+      - ./bin/deploy-coreos production :
+          timeout: 600

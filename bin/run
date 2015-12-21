@@ -1,0 +1,12 @@
+#!/bin/bash
+# Install gems, set up databases and run the given command using bundle exec
+set -e
+
+if [[ "$1" == 'data' ]]; then
+  exit 0
+else
+  bundle config --delete frozen
+  bundle config --delete without
+  bundle install --quiet
+  exec bundle exec "$@"
+fi

@@ -1,0 +1,37 @@
+#!/bin/bash
+set -e
+vm_name=playlab-dev
+
+function run {
+  if [[ `uname` == 'Darwin' ]]; then
+    log 'Starting docker-machine vm'
+    docker-machine create -d virtualbox $vm_name | true
+    docker-machine start playlab-dev
+    log 'Setting docker-machine environment variables'
+    eval "$(docker-machine env playlab-dev 2> /dev/null)"
+  fi
+  log 'Building docker containers'
+  docker-compose build
+  log 'Starting containers'
+  if [[ "$@" == '' ]]; then
+    docker-compose up
+  else
+    docker-compose run --rm app "$@"
+  fi
+}
+
+function log {
+  echo -e "\033[1m-- $@\033[0m"
+}
+
+case "$@" in
+  -h | --help)
+    echo 'Run the given command inside a docker container.'
+    echo 'If no command is given, run the whole stack.'
+    echo ''
+    echo 'Usage:'
+    echo "  $0 <command>"
+    ;;
+  *)
+    run "$@"
+esac

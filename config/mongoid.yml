@@ -1,0 +1,34 @@
+# Run rails g mongoid:config to see a sample config file
+development:
+  clients:
+    default:
+      database: template_development
+      hosts:
+        - <%= ENV['DB_HOST'] %>
+      options:
+        read:
+          mode: :primary
+  options:
+
+test:
+  clients:
+    default:
+      database: template_test
+      hosts:
+        - <%= ENV['DB_HOST'] %>
+      options:
+        read:
+          mode: :primary
+        max_pool_size: 1
+  options:
+
+production:
+  clients:
+    default:
+      database: template
+      hosts:
+        - <%= ENV['DB_HOST'] %>
+      options:
+        read:
+          mode: :primary
+  options:
